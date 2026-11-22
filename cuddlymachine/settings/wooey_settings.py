@@ -1,21 +1,14 @@
+from django.utils.translation import gettext_lazy as _
+
 from .django_settings import *
-from wooey.version import DJANGO_VERSION, DJ110
-from django.utils.translation import ugettext_lazy as _
 
 INSTALLED_APPS += (
     # 'corsheaders',
     'wooey',
 )
 
-if DJANGO_VERSION < DJ110:
-    MIDDLEWARE_CLASSES = list(MIDDLEWARE_CLASSES)
-    MIDDLEWARE_CLASSES.append('cuddlymachine.middleware.ProcessExceptionMiddleware')
-    MIDDLEWARE_OBJ = MIDDLEWARE_CLASSES
-else:
-    # Using Django 1.10 +
-    MIDDLEWARE = list(MIDDLEWARE)
-    MIDDLEWARE.append('cuddlymachine.middleware.ProcessExceptionMiddleware')
-    MIDDLEWARE_OBJ = MIDDLEWARE
+MIDDLEWARE = list(MIDDLEWARE)
+MIDDLEWARE_OBJ = MIDDLEWARE
 
 LANGUAGES = [
   ('de', _('German')),
@@ -33,10 +26,7 @@ for i in MIDDLEWARE_OBJ:
         NEW_MIDDLEWARE.append('django.middleware.locale.LocaleMiddleware')
 
 NEW_MIDDLEWARE.append('cuddlymachine.middleware.ProcessExceptionMiddleware')
-if DJANGO_VERSION < DJ110:
-    MIDDLEWARE_CLASSES = NEW_MIDDLEWARE
-else:
-    MIDDLEWARE = NEW_MIDDLEWARE
+MIDDLEWARE = NEW_MIDDLEWARE
 
 PROJECT_NAME = "cuddlymachine"
 WOOEY_CELERY_APP_NAME = 'wooey.celery'

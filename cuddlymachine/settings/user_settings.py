@@ -1,6 +1,7 @@
-import errno
 import os
+
 from .wooey_settings import *
+
 # This file is where the user can override and customize their installation of wooey
 
 # Wooey Apps - add additional apps here after the initial install (remember to follow everything by a comma)
@@ -28,13 +29,7 @@ CELERY_BROKER_URL = 'filesystem://'
 
 # This function exists just to ensure the filesystem has the correct folders
 def ensure_path(path):
-    try:
-        os.makedirs(path)
-    except Exception as e:
-        if e.errno == errno.EEXIST:
-            pass
-        else:
-            raise
+    os.makedirs(path, exist_ok=True)
     return path
 
 broker_dir = ensure_path(os.path.join(BASE_DIR, '.broker'))

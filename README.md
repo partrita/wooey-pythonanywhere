@@ -1,102 +1,134 @@
-# Wooey for pythonanywhere.com
-> A web ui for python scripts
-<!-- 
-[![NPM Version][npm-image]][npm-url]
-[![Build Status][travis-image]][travis-url]
-[![Downloads Stats][npm-downloads]][npm-url] -->
+# Wooey for PythonAnywhere
 
-[Wooey](https://github.com/wooey/Wooey) is a easy way to get your scripts up on the web for routine data analysis, file processing, or anything else.  
+> A web UI for Python scripts
 
-![](front.png)  
+[Wooey](https://github.com/wooey/Wooey) is an easy way to turn Python scripts into web applications for routine data analysis, file processing, or anything else.
 
-This is [my demo](http://partrita.pythonanywhere.com). **Pythonanywhere** does **not** support **celery**. therefore, scripts will **not** executed.
+![](front.png)
 
-## Installation
-Read [this](http://wooey.readthedocs.io/en/latest/install.html) before you start.
+> **Note on PythonAnywhere:** PythonAnywhere does **not** support background Celery workers on standard web apps. If you deploy without a separate Celery worker, scripts queued via Celery will not execute unless `WOOEY_CELERY = False` is set in `cuddlymachine/settings/user_settings.py` (which runs scripts synchronously).
 
-### 1. Edit `user_settings.py` file in <your-wooey-project> directory
-```
-ALLOWED_HOSTS = (
-    'localhost',
-    '127.0.0.1',
-    ".pythonanywhere.com")
-```
+## Tech Stack
 
-### 2. Git clone at `pythonanywhere` bash console
+- **Python**: 3.14+
+- **Django**: 5.2+
+- **Wooey**: 0.14+
+- **Package Manager**: [uv](https://docs.astral.sh/uv/)
+
+---
+
+## Local Development
+
+### 1. Clone and install dependencies
 
 ```bash
 git clone https://github.com/<your-github-username>/<your-git-repo-name>.git
+cd <your-git-repo-name>
+uv sync
 ```
-Beware of inside of < and >.
 
-### 3. Install `wooey` at `pythonanywhere` bash console
+### 2. Initialize database and superuser
 
 ```bash
-$ cd <your-git-repo-name>
-$ virtualenv --python=python3 myvenv
-$ source myvenv/bin/activate
-(myvenv) $  pip install wooey
+uv run python manage.py migrate
+uv run python manage.py createsuperuser
 ```
-It takes a time.
 
-### 4. Make superuser and database at `pythonAnywhere`
+### 3. Run the development server
 
 ```bash
-(mvenv) $ python manage.py createsuperuser
-(mvenv) $ python manage.py migrate
+uv run python manage.py runserver
 ```
 
-### 5. Add a new web app
-1. Pythonanywhere dashboard
-2. Click the `Web` 
-3. Add a new web app
-4. Set your domain name
-5. Select manual configuration
-6. Select Python 3.4 (This is latest version at 2018/6/14)
-7. Click `Next` button
-8. Setup wizard will closed 
+To execute Wooey scripts asynchronously in local development, run a Celery worker in a separate terminal:
 
-### 6. Set `virtualenv`
-1. In Virtualenv section
-2. Click the `Enter the path to a virtualenv`
-3. Input /home/<your-username>/<your-git-repo-name/myvenv/
-4. Click the blue check button
+```bash
+uv run celery -A cuddlymachine.wooey_celery_app worker -l info
+```
 
-### 7. Set WSGI file 
-Wooey(based on Django) works with WSGI protocol. This is standard protocols for python web app. 
+### 4. Lint & Type Check
 
-1. At Code section, there is `/var/www/<your-username>_pythonanywhere_com_wsgi.py` link
-2. Click the link
-3. Delete everything
-4. Copy and paste below code (beware of <>)
+```bash
+uv run ruff check --fix
+uv run ty check
+```
+
+---
+
+## Deployment on PythonAnywhere
+
+### 1. Configure `ALLOWED_HOSTS`
+
+In `cuddlymachine/settings/user_settings.py`, ensure your PythonAnywhere domain is included:
+
+```python
+ALLOWED_HOSTS = (
+    'localhost',
+    '127.0.0.1',
+    '.pythonanywhere.com',
+)
+```
+
+### 2. Clone and install dependencies on PythonAnywhere
+
+Open a **Bash console** on PythonAnywhere:
+
+```bash
+git clone https://github.com/<your-github-username>/<your-git-repo-name>.git
+cd <your-git-repo-name>
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
+```
+
+### 3. Run migrations, collect static files, and create superuser
+
+```bash
+uv run python manage.py migrate
+uv run python manage.py collectstatic --noinput
+uv run python manage.py createsuperuser
+```
+
+### 4. Add a new Web app
+
+1. Go to the PythonAnywhere **Dashboard** -> **Web**.
+2. Click **Add a new web app**.
+3. Set your domain name and select **Manual configuration**.
+4. Choose the latest available **Python** version and complete the wizard.
+
+### 5. Set Virtualenv path
+
+In the **Virtualenv** section, enter the path to the `.venv` created by `uv`:
+
+```text
+/home/<your-username>/<your-git-repo-name>/.venv
+```
+
+### 6. Configure WSGI file
+
+In the **Code** section, open `/var/www/<your-username>_pythonanywhere_com_wsgi.py`, replace its contents with:
 
 ```python
 import os
 import sys
 
-path = '/home/<your-PythonAnywhere-username>/<your-git-repo-name></your-git-repo-name>'  # PythonAnywhere 계정으로 바꾸세요.
+path = '/home/<your-username>/<your-git-repo-name>'
 if path not in sys.path:
     sys.path.append(path)
 
-os.environ['DJANGO_SETTINGS_MODULE'] = '<your-wooey-project-name>.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'cuddlymachine.settings'
 
 from django.core.wsgi import get_wsgi_application
 from django.contrib.staticfiles.handlers import StaticFilesHandler
+
 application = StaticFilesHandler(get_wsgi_application())
 ```
-Save this file
 
-### 8. Click the reload button
-If there is error, you shold check the error log.
+### 7. Reload
+
+Click the **Reload** button on the Web tab. If any errors occur, check the **Error log** link in the Log files section.
+
+---
 
 ## Meta
 
 Momore hatz – [Blog](https://partrita.github.io)
-
-<!-- Markdown link & img dfn's -->
-<!-- [npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/datadog-metrics
-[npm-downloads]: https://img.shields.io/npm/dm/datadog-metrics.svg?style=flat-square
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
-[wiki]: https://github.com/yourname/yourproject/wiki -->

@@ -1,12 +1,9 @@
 __author__ = 'chris'
-import traceback
 import sys
+import traceback
 
-from wooey.version import DJANGO_VERSION, DJ110
-if DJANGO_VERSION >= DJ110:
-    from django.utils.deprecation import MiddlewareMixin
-else:
-    MiddlewareMixin = object
+from django.utils.deprecation import MiddlewareMixin
+
 
 class ProcessExceptionMiddleware(MiddlewareMixin):
     def process_response(self, request, response):

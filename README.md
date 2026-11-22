@@ -15,7 +15,6 @@
 - **Wooey**: 0.14+
 - **Package Manager**: [uv](https://docs.astral.sh/uv/)
 
----
 
 ## Local Development
 
@@ -52,8 +51,6 @@ uv run celery -A cuddlymachine.wooey_celery_app worker -l info
 uv run ruff check --fix
 uv run ty check
 ```
-
----
 
 ## Deployment on PythonAnywhere
 
@@ -127,8 +124,3 @@ application = StaticFilesHandler(get_wsgi_application())
 
 Click the **Reload** button on the Web tab. If any errors occur, check the **Error log** link in the Log files section.
 
----
-
-## Meta
-
-Momore hatz – [Blog](https://partrita.github.io)
